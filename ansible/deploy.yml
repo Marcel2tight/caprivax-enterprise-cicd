@@ -1,0 +1,11 @@
+---
+- name: Deploy SmartOps
+  hosts: all
+  become: yes
+  tasks:
+    - name: Pull JAR from Nexus
+      get_url:
+        url: "http://{{ nexus_ip }}:8081/repository/smartops-releases/com/smartops/smartops-api/1.0.0/smartops-api-1.0.0.jar"
+        dest: /opt/smartops-api.jar
+    - name: Restart Service
+      shell: "nohup java -jar /opt/smartops-api.jar > /dev/null 2>&1 &"

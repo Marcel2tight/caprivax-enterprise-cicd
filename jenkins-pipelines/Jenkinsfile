@@ -1,0 +1,7 @@
+pipeline {
+    agent any
+    stages {
+        stage('Build') { steps { sh 'mvn -f smartops-backend/pom.xml clean package' } }
+        stage('Deploy') { steps { sh 'ansible-playbook ansible/deploy.yml -i ansible/inventory/dev.ini' } }
+    }
+}

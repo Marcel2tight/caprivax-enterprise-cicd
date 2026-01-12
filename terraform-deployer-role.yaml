@@ -1,0 +1,7 @@
+title: "CaprivaxDeployer"
+description: "Custom role for CI/CD Service Account with least privilege"
+includedPermissions:
+- compute.instances.setMetadata
+- compute.instances.reset
+- storage.objects.get
+- secretmanager.versions.access
