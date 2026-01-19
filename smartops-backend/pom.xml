@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.smartops</groupId>
     <artifactId>smartops-api</artifactId>
-    <version>1.0.0</version>
+    <version>${revision}</version>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>

@@ -5,6 +5,8 @@ pipeline {
         NEXUS_CRED_ID = 'nexus-auth'
         MAVEN_SETTINGS_ID = 'caprivax-maven-settings'
         SONAR_PROJECT_KEY = 'java-webapp'
+        // Define the base version and append the Jenkins Build Number
+        APP_VERSION = "1.0.${env.BUILD_ID}"
     }
     stages {
         stage('Checkout') {
@@ -15,7 +17,10 @@ pipeline {
                 configFileProvider([configFile(fileId: "${MAVEN_SETTINGS_ID}", variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
                         withSonarQubeEnv('SonarQube') {
-                            sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=${SONAR_PROJECT_KEY}"
+                            sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml clean verify \
+                                org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                -Drevision=${APP_VERSION}"
                         }
                     }
                 }
@@ -32,7 +37,8 @@ pipeline {
             steps {
                 configFileProvider([configFile(fileId: "${MAVEN_SETTINGS_ID}", variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
-                        sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml clean deploy -DskipTests"
+                        // We pass the dynamic version here using -Drevision
+                        sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml deploy -DskipTests -Drevision=${APP_VERSION}"
                     }
                 }
             }
