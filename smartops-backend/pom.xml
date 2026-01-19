@@ -23,4 +23,14 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
     </dependencies>
+  <distributionManagement>
+    <repository>
+      <id>nexus-releases</id>
+      <url>http://34.133.9.25:8081/repository/java-webapp-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>nexus-snapshots</id>
+      <url>http://34.133.9.25:8081/repository/java-webapp-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
 </project>
