@@ -6,7 +6,6 @@ pipeline {
     }
 
     environment {
-        // IDs must match your Jenkins Credentials and Managed Files exactly
         NEXUS_CRED_ID = 'nexus-auth'
         MAVEN_SETTINGS_ID = 'caprivax-maven-settings'
         SONAR_PROJECT_KEY = 'java-webapp'
@@ -21,9 +20,10 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                // 'SonarQube' must match the name in Manage Jenkins > System
                 withSonarQubeEnv('SonarQube') {
-                    sh "mvn -f smartops-backend/pom.xml clean verify sonar:sonar \
+                    # We added the full group and artifact ID here to bypass the prefix error
+                    sh "mvn -f smartops-backend/pom.xml clean verify \
+                        org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                         -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                         -Dsonar.projectName=${SONAR_PROJECT_KEY}"
                 }
@@ -32,7 +32,6 @@ pipeline {
 
         stage("Quality Gate") {
             steps {
-                // This waits for the webhook from SonarQube
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
@@ -41,7 +40,6 @@ pipeline {
         
         stage('Build & Deploy to Nexus') {
             steps {
-                // Injects your Nexus credentials into the Maven settings file
                 configFileProvider([configFile(fileId: "${MAVEN_SETTINGS_ID}", variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
                         sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml clean deploy -DskipTests"
