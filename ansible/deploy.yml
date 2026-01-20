@@ -3,9 +3,20 @@
   hosts: all
   become: yes
   tasks:
-    - name: Pull JAR from Nexus
+    - name: Download JAR
       get_url:
-        url: "http://{{ nexus_ip }}:8081/repository/smartops-releases/com/smartops/smartops-api/1.0.0/smartops-api-1.0.0.jar"
+        url: "http://34.133.9.25:8081/repository/java-webapp-releases/com/smartops/smartops-api/{{ app_version }}/smartops-api-{{ app_version }}.jar"
         dest: /opt/smartops-api.jar
-    - name: Restart Service
-      shell: "nohup java -jar /opt/smartops-api.jar > /dev/null 2>&1 &"
+        url_username: admin
+        url_password: "{{ nexus_pwd }}"
+    - name: Restart Systemd Service
+      copy:
+        dest: /etc/systemd/system/smartops.service
+        content: |
+          [Service]
+          ExecStart=/usr/bin/java -jar /opt/smartops-api.jar
+          Restart=always
+      notify: restart_smartops
+  handlers:
+    - name: restart_smartops
+      systemd: { name: smartops, state: restarted, daemon_reload: yes, enabled: yes }
