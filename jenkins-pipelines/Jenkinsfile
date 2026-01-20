@@ -1,28 +1,53 @@
 pipeline {
     agent any
-    tools { maven 'Maven3' }
+    
+    tools { 
+        maven 'Maven3' 
+    }
+
     environment {
-        NEXUS_CRED_ID = 'nexus-auth'
+        // IDs must match your Jenkins Credentials and Managed Files exactly
+        NEXUS_CRED_ID     = 'nexus-auth'
         MAVEN_SETTINGS_ID = 'caprivax-maven-settings'
         SONAR_PROJECT_KEY = 'java-webapp'
-        SSH_CRED_ID = 'target-vm-ssh'
-        APP_VERSION = "1.0.${env.BUILD_ID}"
+        SSH_CRED_ID       = 'target-vm-ssh'
+        // Dynamic versioning: Uses Jenkins Build ID to ensure unique artifacts
+        APP_VERSION       = "1.0.${env.BUILD_ID}"
     }
+
     stages {
-        stage('Checkout') { steps { checkout scm } }
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
         stage('Quality Scan') {
             steps {
                 configFileProvider([configFile(fileId: "${MAVEN_SETTINGS_ID}", variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
                         withSonarQubeEnv('SonarQube') {
-                            sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Drevision=${APP_VERSION}"
+                            // Uses double quotes to allow Groovy to interpolate the variables
+                            sh "mvn -s $MAVEN_SETTINGS -f smartops-backend/pom.xml clean verify \
+                                org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+                                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                -Drevision=${APP_VERSION}"
                         }
                     }
                 }
             }
         }
-        stage("Quality Gate") { steps { timeout(time: 15, unit: 'MINUTES') { waitForQualityGate abortPipeline: true } } }
-        stage('Nexus Deploy') {
+
+        stage("Quality Gate") {
+            steps {
+                // Pauses pipeline until SonarQube sends a webhook callback
+                timeout(time: 15, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build & Deploy to Nexus') {
             steps {
                 configFileProvider([configFile(fileId: "${MAVEN_SETTINGS_ID}", variable: 'MAVEN_SETTINGS')]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
@@ -31,30 +56,44 @@ pipeline {
                 }
             }
         }
-        stage('Deploy Dev') {
+
+        stage('Deploy to Dev') {
             steps {
                 sshagent([SSH_CRED_ID]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
-                        sh "ansible-playbook -i ansible/inventory/dev.ini ansible/deploy.yml -e 'app_version=${APP_VERSION} nexus_pwd=${NEXUS_PWD}'"
+                        sh "ansible-playbook -i ansible/inventory/dev.ini ansible/deploy.yml \
+                            -e 'app_version=${APP_VERSION} nexus_pwd=${NEXUS_PWD}'"
                     }
                 }
             }
         }
-        stage('Promote Prod') {
+
+        stage('Promote to Production') {
             steps {
-                input message: "Approve Production Deployment?"
+                // Manual intervention for Production safety
+                input message: "Approve deployment to PRODUCTION?", ok: "Deploy Now"
+                
                 sshagent([SSH_CRED_ID]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
-                        sh "ansible-playbook -i ansible/inventory/prod.ini ansible/deploy.yml -e 'app_version=${APP_VERSION} nexus_pwd=${NEXUS_PWD}'"
+                        sh "ansible-playbook -i ansible/inventory/prod.ini ansible/deploy.yml \
+                            -e 'app_version=${APP_VERSION} nexus_pwd=${NEXUS_PWD}'"
                     }
                 }
             }
         }
     }
+
     post {
         always {
-            slackSend channel: '#build-status', color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
-                      message: "Build #${env.BUILD_NUMBER} - ${currentBuild.currentResult}: ${env.BUILD_URL}"
+            // Notifies Slack of the final build status
+            slackSend channel: '#build-status',
+                      color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
+                      message: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} - Status: ${currentBuild.currentResult} \nDetails: ${env.BUILD_URL}"
+        }
+        failure {
+            slackSend channel: '#build-status',
+                      color: 'danger',
+                      message: "❌ ALERT: Build #${env.BUILD_NUMBER} FAILED. Review logs at: ${env.BUILD_URL}"
         }
     }
 }
