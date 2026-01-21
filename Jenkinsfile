@@ -2,38 +2,27 @@ pipeline {
     agent any
     
     environment {
-        // Use the exact ID you saved in Jenkins Credentials
         SLACK_CRED_ID = 'slack-token'
-        // Use the verified Channel ID (C09PEC2E03A)
+        // Using the ID for #all-lois-devops to ensure it's found
         SLACK_CHANNEL = 'C09PEC2E03A'
     }
 
     stages {
-        stage('Health Check') {
+        stage('Slack Connectivity Test') {
             steps {
-                echo "Testing Slack connectivity for lois-devops..."
-                sh "date"
+                echo "Testing notification for #all-lois-devops..."
             }
         }
     }
 
     post {
-        success {
+        always {
             slackSend(
                 botUser: true,
                 tokenCredentialId: "${SLACK_CRED_ID}",
                 channel: "${SLACK_CHANNEL}",
-                color: 'good',
-                message: "‚úÖ *FEEDBACK LOOP STABILIZED*\nProject: ${env.JOB_NAME}\nBuild: #${env.BUILD_NUMBER}\nStatus: The Slack integration is working perfectly."
-            )
-        }
-        failure {
-            slackSend(
-                botUser: true,
-                tokenCredentialId: "${SLACK_CRED_ID}",
-                channel: "${SLACK_CHANNEL}",
-                color: 'danger',
-                message: "‚ùå *SLACK TEST FAILED*\nCheck the Jenkins console logs for credential errors."
+                color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
+                message: "Ì∫Ä *Notification System Active*\nChannel: #all-lois-devops\nBuild: #${env.BUILD_NUMBER}\nResult: ${currentBuild.currentResult}"
             )
         }
     }
