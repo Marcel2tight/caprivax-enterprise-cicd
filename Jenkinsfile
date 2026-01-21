@@ -9,8 +9,9 @@ pipeline {
         NEXUS_CRED_ID     = 'nexus-auth'
         MAVEN_SETTINGS_ID = 'caprivax-maven-settings'
         SONAR_PROJECT_KEY = 'java-webapp'
+        SSH_CRED_ID       = 'target-vm-ssh'
         SLACK_CRED_ID     = 'slack-token'
-        // Using your verified Channel ID for reliability
+        // Using your verified Channel ID directly
         SLACK_CHANNEL     = 'C09PEC2E03A'
         APP_VERSION       = "1.0.${env.BUILD_ID}"
     }
@@ -63,7 +64,7 @@ pipeline {
                 tokenCredentialId: "${SLACK_CRED_ID}",
                 channel: "${SLACK_CHANNEL}",
                 color: 'good',
-                message: "✅ *CI SUCCESS*: Build #${env.BUILD_NUMBER} for ${env.JOB_NAME}\nArtifact: smartops-backend-${APP_VERSION}.war\nDetails: ${env.BUILD_URL}"
+                message: "✅ *CI SUCCESS*: Build #${env.BUILD_NUMBER} for ${env.JOB_NAME}\nDetails: ${env.BUILD_URL}"
             )
         }
         failure {
