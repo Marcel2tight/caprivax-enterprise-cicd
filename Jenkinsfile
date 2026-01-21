@@ -8,9 +8,9 @@ pipeline {
     }
 
     stages {
-        stage('Slack Verification') {
+        stage('Slack Loop Test') {
             steps {
-                echo "Isolating Slack notification test for #all-lois-devops..."
+                echo "Testing ONLY Slack notifications..."
             }
         }
     }
@@ -22,7 +22,7 @@ pipeline {
                 tokenCredentialId: "${SLACK_CRED_ID}",
                 channel: "${SLACK_CHANNEL}",
                 color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
-                message: "íº€ *Feedback Loop Confirmed*\nChannel: #all-lois-devops\nBuild: #${env.BUILD_NUMBER}\nResult: ${currentBuild.currentResult}"
+                message: "íº€ *SLACK IS WORKING*\nChannel: #all-lois-devops\nBuild: #${env.BUILD_NUMBER}"
             )
         }
     }
