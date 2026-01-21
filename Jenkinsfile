@@ -3,14 +3,14 @@ pipeline {
     
     environment {
         SLACK_CRED_ID = 'slack-token'
-        // Using the ID for #all-lois-devops to ensure it's found
-        SLACK_CHANNEL = 'C09PEC2E03A'
+        // Using the permanent ID for #all-lois-devops
+        SLACK_CHANNEL = 'C09PEC2E03A' 
     }
 
     stages {
-        stage('Slack Connectivity Test') {
+        stage('Connectivity Test') {
             steps {
-                echo "Testing notification for #all-lois-devops..."
+                echo "Isolating Slack notification test..."
             }
         }
     }
@@ -22,7 +22,7 @@ pipeline {
                 tokenCredentialId: "${SLACK_CRED_ID}",
                 channel: "${SLACK_CHANNEL}",
                 color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
-                message: "íº€ *Notification System Active*\nChannel: #all-lois-devops\nBuild: #${env.BUILD_NUMBER}\nResult: ${currentBuild.currentResult}"
+                message: "íº€ *Feedback Loop Active*\nChannel: #all-lois-devops\nBuild: #${env.BUILD_NUMBER}\nStatus: ${currentBuild.currentResult}"
             )
         }
     }
