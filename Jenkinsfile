@@ -1,8 +1,8 @@
 pipeline {
     agent any
-
-    tools {
-        maven 'Maven3'
+    
+    tools { 
+        maven 'Maven3' 
     }
 
     environment {
@@ -11,33 +11,40 @@ pipeline {
         SONAR_PROJECT_KEY = 'java-webapp'
         SSH_CRED_ID       = 'target-vm-ssh'
         APP_VERSION       = "1.0.${env.BUILD_ID}"
-        SLACK_CHANNEL_ID  = 'C09PEC2E03A'
+        // Use a channel name that DEFINITELY exists
+        SLACK_CHANNEL     = '#random'  // CHANGE THIS to a working channel
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                // Universal checkout - works for both SCM and inline
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '*/main']],
+                    extensions: [],
+                    userRemoteConfigs: [[url: 'https://github.com/YOUR-USERNAME/YOUR-REPO.git']]
+                ])
             }
         }
-
-        stage('Test Slack') {
+        
+        stage('Simple Test') {
             steps {
+                echo "Build started"
+                echo "Testing Slack to: ${SLACK_CHANNEL}"
+                
                 script {
-                    echo "Testing Slack with channel ID: ${SLACK_CHANNEL_ID}"
+                    // Test Slack first
+                    try {
+                        slackSend(
+                            channel: "${SLACK_CHANNEL}",
+                            color: 'good',
+                            message: "✅ Jenkinsfile is working! Channel: ${SLACK_CHANNEL}"
+                        )
+                        echo "Slack test passed"
+                    } catch (Exception e) {
+                        echo "Slack test failed: ${e.message}"
+                    }
                 }
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                slackSend(
-                    channel: "${SLACK_CHANNEL_ID}",
-                    color: 'good',
-                    message: "✅ TEST: Jenkinsfile update successful! Channel ID: ${SLACK_CHANNEL_ID}"
-                )
             }
         }
     }
