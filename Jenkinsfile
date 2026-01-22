@@ -11,38 +11,52 @@ pipeline {
         SONAR_PROJECT_KEY = 'java-webapp'
         SSH_CRED_ID       = 'target-vm-ssh'
         APP_VERSION       = "1.0.${env.BUILD_ID}"
-        // Use a channel name that DEFINITELY exists
-        SLACK_CHANNEL     = '#random'  // CHANGE THIS to a working channel
+        // Use a known working channel first
+        SLACK_CHANNEL     = '#random'  // Change to a channel that exists
     }
 
     stages {
         stage('Checkout') {
             steps {
-                // Universal checkout - works for both SCM and inline
-                checkout([$class: 'GitSCM',
-                    branches: [[name: '*/main']],
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']],  // Changed from master to main
                     extensions: [],
-                    userRemoteConfigs: [[url: 'https://github.com/YOUR-USERNAME/YOUR-REPO.git']]
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/YOUR-USERNAME/YOUR-REPO.git',
+                        credentialsId: 'your-github-credential'  // Add if private repo
+                    ]]
                 ])
             }
         }
         
-        stage('Simple Test') {
+        stage('Test') {
             steps {
-                echo "Build started"
-                echo "Testing Slack to: ${SLACK_CHANNEL}"
+                echo "✅ Checkout successful!"
+                echo "Testing Slack notification..."
                 
                 script {
-                    // Test Slack first
                     try {
                         slackSend(
                             channel: "${SLACK_CHANNEL}",
                             color: 'good',
-                            message: "✅ Jenkinsfile is working! Channel: ${SLACK_CHANNEL}"
+                            message: "✅ Jenkins pipeline started successfully!\nBranch: main\nBuild: #${env.BUILD_NUMBER}"
                         )
-                        echo "Slack test passed"
+                        echo "✅ Slack notification sent to ${SLACK_CHANNEL}"
                     } catch (Exception e) {
-                        echo "Slack test failed: ${e.message}"
+                        echo "⚠️ Slack failed: ${e.message}"
+                        echo "Trying alternative channel..."
+                        
+                        // Fallback to general channel
+                        try {
+                            slackSend(
+                                channel: '#general',
+                                color: 'warning',
+                                message: "⚠️ Jenkins build #${env.BUILD_NUMBER} started (main channel failed)"
+                            )
+                        } catch (Exception e2) {
+                            echo "❌ Both Slack channels failed"
+                        }
                     }
                 }
             }
