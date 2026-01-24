@@ -87,12 +87,14 @@ pipeline {
 
     post {
         always {
-            slackSend channel: '#build-status',
+            // Use the variable ${SLACK_CHANNEL} which holds the ID 'C09PEC2E03A'
+            slackSend channel: "${SLACK_CHANNEL}",
                       color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
-                      message: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} - Status: ${currentBuild.currentResult} \nDetails: ${env.BUILD_URL}"
+                      message: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} - Status: ${currentBuild.currentResult} \nDetails: ${env.BUILD_URL}"  
         }
         failure {
-            slackSend channel: '#build-status',
+            // Again, use the variable instead of the hardcoded name
+            slackSend channel: "${SLACK_CHANNEL}",
                       color: 'danger',
                       message: "❌ ALERT: Build #${env.BUILD_NUMBER} FAILED. Review logs at: ${env.BUILD_URL}"
         }
