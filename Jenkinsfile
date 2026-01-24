@@ -6,19 +6,23 @@ pipeline {
     }
 
     environment {
+        // Infrastructure Identifiers
         NEXUS_CRED_ID     = 'nexus-auth'
         MAVEN_SETTINGS_ID = 'caprivax-maven-settings'
         SONAR_PROJECT_KEY = 'smartops-backend'
         SSH_CRED_ID       = 'target-vm-ssh'
         MGMT_INTERNAL_IP  = '10.128.0.7'
+        
+        // Versioning & Notifications
         APP_VERSION       = "1.0.${env.BUILD_ID}"
-        // These MUST be here for the post block to work
         SLACK_CHANNEL     = 'C09PEC2E03A'
         SLACK_CRED_ID     = 'slack-token'
     }
 
     stages {
-        stage('Checkout') { steps { checkout scm } }
+        stage('Checkout') {
+            steps { checkout scm }
+        }
         
         stage('Quality Scan') {
             steps {
@@ -65,9 +69,20 @@ pipeline {
             }
         }
 
+        stage('Deploy to Staging') {
+            steps {
+                sshagent([SSH_CRED_ID]) {
+                    withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
+                        sh "ansible-playbook -i ansible/inventory/staging.ini ansible/deploy.yml \
+                            -e 'app_version=${APP_VERSION}' -e \"nexus_pwd=${NEXUS_PWD}\""
+                    }
+                }
+            }
+        }
+
         stage('Promote to Production') {
             steps {
-                input message: "Approve deployment to PRODUCTION?", ok: "Deploy Now"
+                input message: "Approve deployment to PRODUCTION Cluster?", ok: "Deploy Now"
                 sshagent([SSH_CRED_ID]) {
                     withCredentials([usernamePassword(credentialsId: "${NEXUS_CRED_ID}", passwordVariable: 'NEXUS_PWD', usernameVariable: 'NEXUS_USR')]) {
                         sh "ansible-playbook -i ansible/inventory/prod.ini ansible/deploy.yml \
@@ -82,7 +97,7 @@ pipeline {
         always {
             slackSend channel: "${env.SLACK_CHANNEL}",
                       color: (currentBuild.currentResult == 'SUCCESS') ? 'good' : 'danger',
-                      message: "Build #${env.BUILD_NUMBER} of ${env.JOB_NAME} - Status: ${currentBuild.currentResult} \nDetails: ${env.BUILD_URL}"
+                      message: "Build #${env.BUILD_NUMBER} - ${env.JOB_NAME}\nStatus: ${currentBuild.currentResult}\nDetails: ${env.BUILD_URL}"
         }
     }
 }
