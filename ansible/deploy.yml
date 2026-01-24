@@ -2,17 +2,18 @@
 - name: Enterprise SmartOps Deployment
   hosts: all
   become: yes
-  
+  serial: 1
+
   vars:
     # NETWORK CONFIG
     nexus_ip: "10.128.0.7" 
-    
+
     # PROJECT IDENTITY
     group_id_path: "com/caprivax"
     artifact_id: "smartops-backend"
     # We change this to war to match your pom.xml packaging
-    extension: "war" 
-    
+    extension: "war"
+
     # TARGET CONFIG
     app_dest: "/opt/smartops-api.{{ extension }}"
 
