@@ -1,22 +1,48 @@
 ---
-- name: Deploy SmartOps
+- name: Enterprise SmartOps Deployment
   hosts: all
   become: yes
+  vars:
+    # NETWORK CONFIG
+    nexus_ip: "10.128.0.7"  # Using Internal IP for stability
+
+    # PROJECT IDENTITY (Must match your pom.xml exactly)
+    group_id_path: "com/caprivax"
+    artifact_id: "smartops-backend"
+
+    # TARGET CONFIG
+    app_dest: "/opt/smartops-api.jar"
+
   tasks:
-    - name: Download JAR
+    - name: 📦 Download Artifact from Nexus
       get_url:
-        url: "http://34.133.9.25:8081/repository/java-webapp-releases/com/smartops/smartops-api/{{ app_version }}/smartops-api-{{ app_version }}.jar"
-        dest: /opt/smartops-api.jar
+        url: "http://{{ nexus_ip }}:8081/repository/java-webapp-releases/{{ group_id_path }}/{{ artifact_id }}/{{ app_version }}/{{ artifact_id }}-{{ app_version }}.jar"
+        dest: "{{ app_dest }}"
         url_username: admin
         url_password: "{{ nexus_pwd }}"
-    - name: Restart Systemd Service
+        mode: '0755'
+
+    - name: ⚙️ Configure Systemd Service
       copy:
         dest: /etc/systemd/system/smartops.service
         content: |
+          [Unit]
+          Description=Caprivax SmartOps API
+          After=network.target
+
           [Service]
-          ExecStart=/usr/bin/java -jar /opt/smartops-api.jar
+          User=marce
+          # Executing the jar we just downloaded
+          ExecStart=/usr/bin/java -jar {{ app_dest }}
+          SuccessExitStatus=143
           Restart=always
-      notify: restart_smartops
-  handlers:
-    - name: restart_smartops
-      systemd: { name: smartops, state: restarted, daemon_reload: yes, enabled: yes }
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: 🚀 Reload Systemd and Restart Service
+      systemd:
+        name: smartops
+        state: restarted
+        daemon_reload: yes
+        enabled: yes
