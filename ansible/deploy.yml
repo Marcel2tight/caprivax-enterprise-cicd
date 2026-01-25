@@ -2,19 +2,18 @@
 - name: Enterprise SmartOps Deployment
   hosts: all
   become: yes
-  serial: 1
+  serial: 1  
 
   vars:
-    # NETWORK CONFIG
-    nexus_ip: "10.128.0.7" 
-
-    # PROJECT IDENTITY
-    group_id_path: "com/caprivax"
+    nexus_ip: "10.128.0.7"
+    
+    # FIX: Match the groupId from your pom.xml (com.smartops)
+    group_id_path: "com/smartops"
     artifact_id: "smartops-backend"
-    # We change this to war to match your pom.xml packaging
+    
+    # Match the packaging type from your build
     extension: "war"
-
-    # TARGET CONFIG
+    
     app_dest: "/opt/smartops-api.{{ extension }}"
 
   tasks:
@@ -25,26 +24,10 @@
         url_username: admin
         url_password: "{{ nexus_pwd }}"
         mode: '0755'
+        # Important: Ensure basic auth is forced for Nexus
+        force_basic_auth: yes
 
-    - name: ⚙️ Configure Systemd Service
-      copy:
-        dest: /etc/systemd/system/smartops.service
-        content: |
-          [Unit]
-          Description=Caprivax SmartOps API
-          After=network.target
-
-          [Service]
-          User=marce
-          # Java can execute .war files directly with the -jar flag if they are executable
-          ExecStart=/usr/bin/java -jar {{ app_dest }}
-          SuccessExitStatus=143
-          Restart=always
-
-          [Install]
-          WantedBy=multi-user.target
-
-    - name: 🚀 Reload Systemd and Restart Service
+    - name: 🚀 Restart SmartOps Service
       systemd:
         name: smartops
         state: restarted
