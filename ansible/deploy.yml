@@ -6,14 +6,10 @@
 
   vars:
     nexus_ip: "10.128.0.7"
-    
-    # FIX: Match the groupId from your pom.xml (com.smartops)
-    group_id_path: "com/smartops"
+    # PATH FIX: Matches com.caprivax from Nexus metadata
+    group_id_path: "com/caprivax"
     artifact_id: "smartops-backend"
-    
-    # Match the packaging type from your build
-    extension: "war"
-    
+    extension: "jar"
     app_dest: "/opt/smartops-api.{{ extension }}"
 
   tasks:
@@ -23,9 +19,8 @@
         dest: "{{ app_dest }}"
         url_username: admin
         url_password: "{{ nexus_pwd }}"
-        mode: '0755'
-        # Important: Ensure basic auth is forced for Nexus
         force_basic_auth: yes
+        timeout: 30
 
     - name: 🚀 Restart SmartOps Service
       systemd:

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
    <modelVersion>4.0.0</modelVersion>
-   <groupId>com.smartops</groupId>
+   <groupId>com.caprivax</groupId>
    <artifactId>smartops-backend</artifactId>
    <version>${revision}</version>
+   <packaging>jar</packaging>
+
    <parent>
        <groupId>org.springframework.boot</groupId>
        <artifactId>spring-boot-starter-parent</artifactId>
@@ -21,13 +23,11 @@
            <groupId>org.springframework.boot</groupId>
            <artifactId>spring-boot-starter-web</artifactId>
        </dependency>
-       
        <dependency>
            <groupId>org.springframework.boot</groupId>
            <artifactId>spring-boot-starter-test</artifactId>
            <scope>test</scope>
        </dependency>
-
        <dependency>
            <groupId>org.springframework.boot</groupId>
            <artifactId>spring-boot-starter-actuator</artifactId>
@@ -37,20 +37,6 @@
            <artifactId>micrometer-registry-prometheus</artifactId>
        </dependency>
    </dependencies>
-
-   <build>
-       <plugins>
-           <plugin>
-               <groupId>org.jacoco</groupId>
-               <artifactId>jacoco-maven-plugin</artifactId>
-               <version>0.8.10</version>
-               <executions>
-                   <execution><goals><goal>prepare-agent</goal></goals></execution>
-                   <execution><id>report</id><phase>test</phase><goals><goal>report</goal></goals></execution>
-               </executions>
-           </plugin>
-       </plugins>
-   </build>
 
    <distributionManagement>
        <repository>
