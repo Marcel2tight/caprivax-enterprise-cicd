@@ -54,7 +54,7 @@
 
    <distributionManagement>
        <repository>
-           <id>nexus-releases</id>
+           <id>nexus-auth</id>
            <url>http://10.128.0.7:8081/repository/java-webapp-releases/</url>
        </repository>
    </distributionManagement>
