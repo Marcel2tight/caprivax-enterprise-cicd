@@ -3,21 +3,43 @@
   hosts: all
   become: yes
   serial: 1  
+
   vars:
     nexus_ip: "10.128.0.7"
     group_id_path: "com/caprivax"
     artifact_id: "smartops-backend"
     extension: "jar"
     app_dest: "/opt/smartops-api.{{ extension }}"
+
   tasks:
-    - name: 📦 Download Artifact
+    - name: 📦 Download Artifact from Nexus
       get_url:
         url: "http://{{ nexus_ip }}:8081/repository/java-webapp-releases/{{ group_id_path }}/{{ artifact_id }}/{{ app_version }}/{{ artifact_id }}-{{ app_version }}.{{ extension }}"
         dest: "{{ app_dest }}"
         url_username: admin
         url_password: "{{ nexus_pwd }}"
         force_basic_auth: yes
-    - name: 🚀 Restart SmartOps Service
+
+    - name: 📝 Update Systemd Service File
+      copy:
+        dest: /etc/systemd/system/smartops.service
+        content: |
+          [Unit]
+          Description=Caprivax SmartOps API
+          After=network.target
+
+          [Service]
+          User=marce
+          # FIX: Now pointing to the .jar file
+          ExecStart=/usr/bin/java -jar {{ app_dest }}
+          SuccessExitStatus=143
+          Restart=always
+          WorkingDirectory=/opt
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: 🚀 Reload Systemd and Restart App
       systemd:
         name: smartops
         state: restarted
