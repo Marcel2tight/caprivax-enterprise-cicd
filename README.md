@@ -1,4 +1,4 @@
-# Caprivax CI/CD Platform 🚀
+# Caprivax CI/CD Platform 
 ### Enterprise-Grade Infrastructure-as-Code & Automated Observability on GCP
 
 ![GCP](https://img.shields.io/badge/GCP-%234285F4.svg?style=for-the-badge&logo=google-cloud&logoColor=white)
@@ -11,10 +11,10 @@
 
 ---
 
-## 📌 Project Overview
+##  Project Overview
 This repository contains the complete architecture for a multi-environment CI/CD platform deployed on Google Cloud Platform. It utilizes a **Modular Monorepo** pattern to manage Infrastructure-as-Code (IaC), automated server hydration, and a full observability stack.
 
-### 🌟 Key Highlights
+### Key Highlights
 * **Separation of Planes:** Logic divided into a "Management Plane" (Control Center) and "Data Plane" (Dev/Staging/Prod).
 * **Binary-to-Metric Pipeline:** Automated flow from Java source code to Prometheus-scraped JVM metrics.
 * **Artifact Integrity:** Immutable versioning using Nexus Repository Manager for reliable rollbacks.
@@ -24,25 +24,24 @@ This repository contains the complete architecture for a multi-environment CI/CD
 
 ## 🏗️ Repository Structure
 caprivax-cicd-platform/
-├── bootstrap/ # Standalone Management Plane (Hydration scripts)
-├── smartops-backend/ # Spring Boot API with Actuator & Micrometer
-├── ansible/ # Configuration Management (Deployment & Systemd)
-├── jenkins-infrastructure/ # The Data Plane (Terraform Modules)
-│ ├── modules/ # Reusable blocks (Networking, Monitoring, IAM)
-│ └── environments/ # Environment-specific configs (Dev, Staging, Prod)
-├── terraform-pipelines/ # Groovy Pipelines-as-Code for Jenkins orchestration
-├── docs/ # Project Documentation & Screenshots
-│ ├── pipeline.png # Jenkins Pipeline Visualization
-│ ├── prometheus-targets.png # Monitoring Dashboard
-│ ├── grafana.png # Grafana Metrics
-│ └── slack.png # Alert Notifications
-└── README.md # Project Overview
+├── bootstrap/                    # Standalone Management Plane (Hydration scripts)
+├── smartops-backend/             # Spring Boot API with Actuator & Micrometer
+├── ansible/                      # Configuration Management (Deployment & Systemd)
+├── jenkins-infrastructure/       # The Data Plane (Terraform Modules)
+│ ├── modules/                    # Reusable blocks (Networking, Monitoring, IAM)
+│ └── environments/               # Environment-specific configs (Dev, Staging, Prod)
+├── terraform-pipelines/          # Groovy Pipelines-as-Code for Jenkins orchestration
+├── docs/                         # Project Documentation & Screenshots
+│ ├── pipeline.png                # Jenkins Pipeline Visualization
+│ ├── prometheus-targets.png      # Monitoring Dashboard
+│ ├── grafana.png                 # Grafana Metrics
+│ └── slack.png                   # Alert Notifications
+└── README.md                     # Project Overview
 
-text
 
 ---
 
-## 🚀 Deployment Logic & Visual Evidence
+##  Deployment Logic & Visual Evidence
 
 ### 1. The Management Plane (The Director)
 The platform is anchored by a hydrated Manager VM. This acts as the Jenkins Controller, Nexus Repository, and Monitoring Hub. It orchestrates the lifecycle of the entire fleet.
@@ -80,14 +79,14 @@ Deployed as a Docker-composed stack, featuring real-time health visualization an
 
 ---
 
-## 🔒 Security & Stability Posture
+##  Security & Stability Posture
 * **Least Privilege:** CI/CD actions performed via dedicated Service Accounts.
 * **Network Isolation:** Internal communication restricted to authorized ports (8080 for API, 9090 for Scraping).
 * **Stability:** Optimized Management Plane with 2.00 GiB Swap configuration to ensure build reliability.
 
 ---
 
-## 🧠 Technical Challenges & Solutions
+##  Technical Challenges & Solutions
 
 | Challenge | Solution |
 |-----------|----------|
