@@ -105,7 +105,6 @@ Configuration Drift	Resolved systemd failures by using Ansible to enforce state,
 Resource Exhaustion	Mitigated Jenkins build failures on the Management Plane by implementing a 2GB Linux swapfile and optimizing JVM heap settings
 Observability Gaps	Instrumented Spring Boot with Micrometer and Prometheus Actuator to move beyond basic "up/down" checks to deep JVM telemetry
 Artifact Portability	Integrated the spring-boot-maven-plugin to repackage standard JARs into executable "Fat JARs," ensuring all dependencies were bundled for cloud deployment
-
 👤 Author
 Marcel Owhonda - Cloud & DevOps Engineer
 
