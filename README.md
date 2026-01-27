@@ -45,11 +45,21 @@ Deployed as a Docker-composed stack, featuring real-time health visualization an
 •	Grafana: Visualizes health via Dashboard 11378 (JVM Micrometer Statistics).
 •	Slack: Automated notifications for deployment status and system alerts.
 
-<p align="center"><img src="docs/prometheus-targets.png" width="900" alt="Prometheus Health">
+<p align="center">
+  <img src="docs/pipeline.png" width="900" alt="Jenkins Pipeline Success">
+  <br><i>Visual proof of the multi-stage CI/CD pipeline execution.</i>
+</p>
 
-<i>Prometheus dashboard showing 4/4 active 'smartops-enterprise-fleet' targets.</i></p>
+<p align="center">
+  <img src="docs/prometheus-targets.png" width="900" alt="Prometheus Health">
+  <br><i>Prometheus dashboard showing 4/4 active targets.</i>
+</p>
 
-<p align="center"><img src="docs/grafana.png" width="48%" /><img src="docs/slack.png" width="48%" /></p><p align="center"><i>Live JVM Telemetry Dashboard (Left) and Automated Slack Notifications (Right).</i></p>
+<p align="center">
+  <img src="docs/grafana.png" width="48%" />
+  <img src="docs/slack.png" width="48%" />
+  <br><i>Live JVM Telemetry Dashboard (Left) and Automated Slack Notifications (Right).</i>
+</p>
 
 🔒 Security & Stability Posture
 •	Least Privilege: CI/CD actions performed via dedicated Service Accounts.
