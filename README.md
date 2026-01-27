@@ -31,7 +31,12 @@ caprivax-cicd-platform/
 │ ├── modules/ # Reusable blocks (Networking, Monitoring, IAM)
 │ └── environments/ # Environment-specific configs (Dev, Staging, Prod)
 ├── terraform-pipelines/ # Groovy Pipelines-as-Code for Jenkins orchestration
-└── README.md # Project Documentation
+├── docs/ # Project Documentation & Screenshots
+│ ├── pipeline.png # Jenkins Pipeline Visualization
+│ ├── prometheus-targets.png # Monitoring Dashboard
+│ ├── grafana.png # Grafana Metrics
+│ └── slack.png # Alert Notifications
+└── README.md # Project Overview
 
 text
 
@@ -48,7 +53,7 @@ The platform is anchored by a hydrated Manager VM. This acts as the Jenkins Cont
 * **Deploy:** Ansible fetches the versioned JAR from Nexus and deploys it to target VMs, configuring the `systemd` unit for high availability.
 
 <p align="center">
-  <img src="pipeline.png" width="900" alt="Jenkins Pipeline Success" />
+  <img src="docs/pipeline.png" width="900" alt="Jenkins Pipeline Success" />
   <br>
   <i>Visual proof of the multi-stage CI/CD pipeline execution.</i>
 </p>
@@ -61,14 +66,14 @@ Deployed as a Docker-composed stack, featuring real-time health visualization an
 * **Slack:** Automated notifications for deployment status and system alerts.
 
 <p align="center">
-  <img src="prometheus-targets.png" width="900" alt="Prometheus Target Health" />
+  <img src="docs/prometheus-targets.png" width="900" alt="Prometheus Target Health" />
   <br>
   <i>Prometheus health dashboard showing 4/4 active 'smartops-enterprise-fleet' targets.</i>
 </p>
 
 <p align="center">
-  <img src="grafana.png" width="48%" alt="Grafana Dashboard" />
-  <img src="slack.png" width="48%" alt="Slack Alerts" />
+  <img src="docs/grafana.png" width="48%" alt="Grafana Dashboard" />
+  <img src="docs/slack.png" width="48%" alt="Slack Alerts" />
   <br>
   <i>Live JVM Telemetry Dashboard (Left) and Automated Slack Notifications (Right).</i>
 </p>
