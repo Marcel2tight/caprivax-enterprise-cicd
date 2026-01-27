@@ -1,4 +1,4 @@
-# Caprivax CI/CD Platform 
+# Caprivax CI/CD Platform 🚀
 ### Enterprise-Grade Infrastructure-as-Code & Automated Observability on GCP
 
 📌 **Project Overview**
